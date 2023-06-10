@@ -1,5 +1,9 @@
 framework:
     cache:
+        app: cache.adapter.filesystem
+        system: cache.adapter.system
+        directory: '%kernel.cache_dir%/pools' # Only used with cache.adapter.filesystem
+
         # Unique name of your app: used to compute stable namespaces for cache keys.
         #prefix_seed: your_vendor_name/app_name
 
@@ -15,5 +19,24 @@ framework:
         #app: cache.adapter.apcu
 
         # Namespaced pools use the above "app" backend by default
-        #pools:
-            #my.dedicated.cache: null
+        pools:
+            katas:
+                adapter: cache.adapter.filesystem
+                #prefix_seed: your_vendor_name/app_name
+                #public: true
+                #default_lifetime: 3600
+                #reset: false
+                #tags: ['my_tag', 'my_other_tag']
+                #max_entries: 1000
+                #max_lifetime: 3600
+                #provider: cache.app.my_redis_provider
+                #sync_tags: true
+                #tag_pool: cache.app.my_redis_tag_pool
+                #tag_version: 1.0
+                #version: 1.0
+                #pool: cache.app.my_redis_pool
+                #skip_versioning: false
+                #skip_warming_up: false
+                #tags_pool: cache.app.my_redis_tags_pool
+                #tags_version: 1.0
+                #warming_up: false
