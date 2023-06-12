@@ -2,10 +2,11 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Exception;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class KataController extends AbstractController
 {
@@ -18,6 +19,7 @@ class KataController extends AbstractController
     const CURL_GET_REQUEST_PREFIX = "curl --location --request GET ";
     const CURL_HEADER = " \
     --header 'Cookie: CSRF-TOKEN=MIcLCNTFxC%2B4D%2BY37O6Uop6RxtHZ5xL7mmBdcRVtZ3GRefdqVs16xcOxVbMW4JU7u8JhCyrwHxFNjknhwr3W3w%3D%3D; _session_id=90d494baea9b858a4f9f5cf27b9e28de'";
+    const CURL_HEADER_COOKIE = "Cookie: CSRF-TOKEN=MIcLCNTFxC%2B4D%2BY37O6Uop6RxtHZ5xL7mmBdcRVtZ3GRefdqVs16xcOxVbMW4JU7u8JhCyrwHxFNjknhwr3W3w%3D%3D; ";
     const CURL_KATA_URL = 'https://www.codewars.com/api/v1/code-challenges/';
     const EASY_DIFFICULTY_LABEL = 'easy';
     const EASY_KATAS_FILE = 'easy-katas.json';
@@ -54,7 +56,7 @@ class KataController extends AbstractController
     }
 
     #[Route('/kata/sync', name: 'kata_sync', methods: ['GET'])]
-    public function sync(): Response
+    public function sync(): Response //TODO: Add a cron job to sync the katas every 24 hours
     {
         $katas = $this->getKatasList();
 
@@ -77,9 +79,14 @@ class KataController extends AbstractController
         return $response->send();
     }
 
-    private function getCachedData()
+    public function getCachedData()
     {
-        $json = file_get_contents(self::EASY_KATAS_FILE);
+        try{
+            $json = file_get_contents(self::EASY_KATAS_FILE) ?? '';
+        } catch(Exception $e) {
+            $json = '';
+        }
+        
         return json_decode($json, true);
     }
 
