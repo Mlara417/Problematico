@@ -10,6 +10,7 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
  */
 class KataControllerTest extends ApiTestCase
 {
+    //using postman mock server to mock the api
     public $options = [
         'auth_basic' => null,
         'auth_bearer' => null,
