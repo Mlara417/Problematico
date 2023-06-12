@@ -36,14 +36,7 @@ class KataController extends AbstractController
             return $this->json($katas);
         }
 
-        //Show only the katas that match the ids passed
-        foreach ($ids as $id) {
-            $kataIndex = $this->kataExists($katas, $id);
-
-            if ($kataIndex !== false) {
-                $searchList[] = $katas[$kataIndex];
-            }
-        }
+        $searchList = $this->find($katas, $ids);
 
         if (isset($searchList)) {
             return $this->json($searchList);
@@ -53,6 +46,20 @@ class KataController extends AbstractController
         $response = new Response(self::ERROR_NOT_FOUND_MESSAGE, Response::HTTP_NOT_FOUND);
 
         return $response->send();
+    }
+
+    public function find($katas, $ids)
+    {
+        //Show only the katas that match the ids passed
+        foreach ($ids as $id) {
+            $kataIndex = $this->kataExists($katas, $id);
+
+            if ($kataIndex !== false) {
+                $searchList[] = $katas[$kataIndex];
+            }
+        }
+
+        return $searchList ?? null;
     }
 
     #[Route('/kata/sync', name: 'kata_sync', methods: ['GET'])]
