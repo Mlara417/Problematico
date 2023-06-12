@@ -22,18 +22,25 @@ class KataControllerTest extends ApiTestCase
         'extra' => [],
     ];
 
-    public $kata = '{
+    public $kata = '
+    {
         id: "1",
         name: "John",
         question: "Test question",
         type: "easy"
-        },
-        {
-            id: "2",
-            name: "Mike",
-            question: "Test question",
-            type: "easy"
-        }';
+    },
+    {
+        id: "2",
+        name: "Mike",
+        question: "Test2 question",
+        type: "easy"
+    },
+    {
+        id: "3",
+        name: "Dan",
+        question: "Test3 question",
+        type: "easy"
+    }';
 
     public $vfs;
     public $easyKatas;
@@ -42,25 +49,56 @@ class KataControllerTest extends ApiTestCase
     public function testList(): void
     {
         $kataControllerMock = Mockery::mock('KataController');
+
+        $kataControllerMock->shouldReceive('getCachedData')
+            ->once()
+            ->andReturn($this->kata);
+
+        $response = static::createClient()->request('GET', '/kata', $this->options);
+
+        $this->assertResponseIsSuccessful();
+    }
+
+    //TODO: fix this test
+    /*     public function testListWithIds(): void
+    {
+        $expected = [
+            [
+                "id" => "1",
+                "name" => "John",
+                "question" => "Test question",
+                "type" => "easy"
+            ],
+            [
+                "id" => "2",
+                "name" => "Mike",
+                "question" => "Test2 question",
+                "type" => "easy"
+            ]
+        ];
+
+        $kataControllerMock = Mockery::mock('KataController');
         
         $kataControllerMock->shouldReceive('getCachedData')
             ->once()
             ->andReturn($this->kata);
 
-        $response = static::createClient()->request('GET', '/kata', $this->options); 
+        $kataControllerMock->shouldReceive('find')
+            ->once()
+            ->andReturn($expected);
+
+        $response = static::createClient()->request('GET', '/kata?ids[]=1&ids[]=2', $this->options); 
         
-        $this->assertResponseIsSuccessful();
-        
-    }
+        $this->assertJsonEquals($expected);
+    } */
 
     public function testSync(): void
     {
         $kataControllerMock = Mockery::mock('KataController');
 
-        $response = static::createClient()->request('GET', '/kata/sync', $this->options); 
-        
+        $response = static::createClient()->request('GET', '/kata/sync', $this->options);
+
         $this->assertResponseIsSuccessful("Katas sync\'d successfully");
         /* $this->assertJsonContains(['@id' => '/']); */
     }
-
 }
