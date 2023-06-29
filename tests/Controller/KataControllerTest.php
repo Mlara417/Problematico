@@ -99,6 +99,6 @@ class KataControllerTest extends ApiTestCase
         $response = static::createClient()->request('GET', '/kata/sync', $this->options);
 
         $this->assertResponseIsSuccessful("Katas sync\'d successfully");
-        /* $this->assertJsonContains(['@id' => '/']); */
+       /* $this->assertJsonContains(['@id' => '/']); */
     }
 }

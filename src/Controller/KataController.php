@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use Exception;
+use App\Entity\Kata;
+use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -27,7 +30,7 @@ class KataController extends AbstractController
     const SUCCESSFUL_SYNC_MESSAGE = 'Katas sync\'d successfully';
 
     #[Route('/kata', name: 'kata_list', methods: ['GET'])]
-    public function list(#[MapQueryParameter] ?array $ids): Response
+    public function list(#[MapQueryParameter] ?array $ids, EntityManagerInterface $entityManager): Response
     {
         $katas = $this->getCachedData();
 
@@ -66,6 +69,12 @@ class KataController extends AbstractController
     public function sync(): Response //TODO: Add a cron job to sync the katas every 24 hours
     {
         $katas = $this->getKatasList();
+
+        if(!is_array($katas)) {
+            $response = new Response($katas, Response::HTTP_INTERNAL_SERVER_ERROR);
+
+            return $response->send();
+        }
 
         foreach ($katas as $kata) {
             $codewarsKata = $this->getKata($kata[self::CODEWARS_KATA_ID_LABEL]);
@@ -108,11 +117,23 @@ class KataController extends AbstractController
     {
         $output = shell_exec(self::CURL_GET_REQUEST_PREFIX . self::CURL_COLLECTION_URL . self::CURL_HEADER);
         $output = json_decode($output, true);
-        return $output[self::CODEWARS_COLLECTIONS_LABEL][0][self::CODEWARS_COLLECTION_KATAS];
+        return $output["success"] ? $output[self::CODEWARS_COLLECTIONS_LABEL][0][self::CODEWARS_COLLECTION_KATAS] : $output['reason'];
     }
 
     private function kataExists($katas, $search, $searchKey = 'id')
     {
         return array_search($search, array_column($katas, $searchKey));
+    }
+
+    private function saveKataToDB(EntityManagerInterface $entityManager, $kata)
+    {
+        $kataObject = new Kata();
+		$kataObject->setName($kata['name']);
+		$kataObject->setType($kata['type']);
+		$kataObject->setQuestion($kata['question']);
+		$kataObject->setCreatedAt(new DateTimeImmutable());
+
+		$entityManager->persist($kataObject);
+		$entityManager->flush();
     }
 }
